@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Concessionnaire</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 2rem;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #004080;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .section {
+      margin-bottom: 2rem;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      padding: 0.5rem;
+      width: calc(100% - 12px);
+      margin-bottom: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #007bff;
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    pre {
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .section-title {
+      color: #0056b3;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🚗 Gestion de Concessionnaire</h1>
+
+    <div class="section">
+      <div class="section-title">➕ Ajouter une voiture</div>
+      <div class="field-group">
+        <input type="text" id="plate" placeholder="Plaque (ex: AB-123-CD)">
+        <input type="text" id="brand" placeholder="Marque (ex: Renault)">
+        <input type="number" id="price" placeholder="Prix (ex: 18000)">
+        <button onclick="addCar()">Ajouter</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🚗 Louer une voiture</div>
+      <div class="field-group">
+        <input type="text" id="rentPlate" placeholder="Plaque à louer">
+        <button onclick="rentCar()">Louer</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔁 Rendre une voiture</div>
+      <div class="field-group">
+        <input type="text" id="returnPlate" placeholder="Plaque à rendre">
+        <button onclick="returnCar()">Rendre</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🛒 Acheter une voiture</div>
+      <div class="field-group">
+        <input type="text" id="buyPlate" placeholder="Plaque à acheter">
+        <button onclick="buyCar()">Acheter</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📋 Liste des voitures</div>
+      <button onclick="getCars()">🔄 Rafraîchir</button>
+      <pre id="output">Clique sur "Rafraîchir" pour voir les voitures</pre>
+    </div>
+  </div>
+
+<script>
+  const baseUrl = "http://localhost:4040/cars";
+
+  async function getCars() {
+    const res = await fetch(baseUrl);
+    const data = await res.json();
+    document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+  }
+
+  async function addCar() {
+    const plate = document.getElementById("plate").value;
+    const brand = document.getElementById("brand").value;
+    const price = parseInt(document.getElementById("price").value);
+
+    await fetch(baseUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plateNumber: plate, brand, price })
+    });
+
+    getCars();
+  }
+
+  async function rentCar() {
+    const plate = document.getElementById("rentPlate").value;
+    await fetch(`${baseUrl}/${plate}/rent`, { method: "PUT" });
+    getCars();
+  }
+
+  async function returnCar() {
+    const plate = document.getElementById("returnPlate").value;
+    await fetch(`${baseUrl}/${plate}/return`, { method: "PUT" });
+    getCars();
+  }
+
+  async function buyCar() {
+    const plate = document.getElementById("buyPlate").value;
+    await fetch(`${baseUrl}/${plate}/buy`, { method: "DELETE" });
+    getCars();
+  }
+
+  getCars();
+</script>
+
+</body>
+</html>
